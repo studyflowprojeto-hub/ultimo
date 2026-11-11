@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4c1d95">
+  <title>{% block titulo %}Painel Escolar{% endblock %} | Study Flow</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand" href="{{ url_for('inicio') }}">
+        <span class="brand-mark">SF</span>
+        <span class="brand-copy"><strong>Study Flow</strong><small>Gestão escolar</small></span>
+      </a>
+      <div class="nav-label">MENU PRINCIPAL</div>
+      <nav class="side-nav">
+        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="{{ url_for('inicio') }}"><span class="nav-icon">⌂</span> Visão geral</a>
+      </nav>
+      <div class="nav-label nav-label-spaced">GERENCIAMENTO</div>
+      <nav class="side-nav">
+        {% for item in [
+          ('disciplinas','▤'),
+          ('notas','✎'),('materiais','▣'),('atividades','☷'),('recomendacoes','☆')
+        ] %}
+          {% if item[0] in tabelas|default([]) %}
+            <a class="nav-link {% if request.path == '/' ~ item[0] %}active{% endif %}" href="{{ url_for('listar', tabela=item[0]) }}"><span class="nav-icon">{{ item[1] }}</span><span>{{ {'recomendacoes':'Recomendações','materiais':'Materiais de apoio','atividades':'Atividades escolares'}.get(item[0], item[0]|replace('_',' ')|title) }}</span></a>
+          {% endif %}
+        {% endfor %}
+        {% if 'frequencia' in tabelas|default([]) %}<a class="nav-link {% if request.path.startswith('/frequencia') %}active{% endif %}" href="{{ url_for('calendario_frequencia') }}"><span class="nav-icon">✓</span><span>Frequência</span></a>{% endif %}
+      </nav>
+      <div class="sidebar-bottom"><span class="status-dot"></span> Ambiente escolar organizado</div>
+    </aside>
+
+    <div class="main-area">
+      <header class="topbar">
+        <div><span class="eyebrow">ESPAÇO DE APRENDIZAGEM</span><h1>{% block cabecalho %}Visão geral{% endblock %}</h1></div>
+        <div class="topbar-right"><span class="topbar-icon">⌕</span><div class="user-chip"><span class="avatar">{{ (session.get("usuario_nome", "U")[:1])|upper }}</span><span><strong>{{ session.get("usuario_nome", "Usuário") }}</strong><small>{{ session.get("usuario_tipo", "Conta")|title }}</small></span><form method="post" action="{{ url_for('sair') }}" class="logout-form"><button class="logout-button" type="submit">Sair</button></form></div></div>
+      </header>
+      <main class="page-content">
+        {% with msgs = get_flashed_messages() %}
+          {% if msgs %}<div class="flash-stack">{% for msg in msgs %}<div class="flash-message"><span class="flash-icon">i</span><span>{{ msg }}</span></div>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        {% block conteudo %}{% endblock %}
+      </main>
+      <footer class="footer"><span>Study Flow · Gestão escolar</span><span>Projeto acadêmico · Python + Flask + MySQL</span></footer>
+    </div>
+  </div>
+  <script>
+    document.querySelectorAll('[data-table-search]').forEach(function(input) {
+      input.addEventListener('input', function() {
+        var query = input.value.toLocaleLowerCase('pt-BR');
+        document.querySelectorAll('[data-search-row]').forEach(function(row) {
+          row.hidden = !row.innerText.toLocaleLowerCase('pt-BR').includes(query);
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}{{ acao }}{% endblock %}
+{% block cabecalho %}{{ acao }}{% endblock %}
+{% block conteudo %}
+<div class="breadcrumb"><a href="{{ url_for('inicio') }}">Visão geral</a><span>›</span><a href="{{ url_for('listar', tabela=tabela) }}">{{ tabela|replace('_',' ')|title }}</a><span>›</span><span>{{ acao }}</span></div>
+<section class="content-heading form-page-heading"><div><span class="eyebrow">{{ 'EDIÇÃO DE INFORMAÇÕES' if 'Editar' in acao else 'NOVO REGISTRO' }}</span><h2>{{ acao }}</h2><p>Preencha os campos abaixo para {{ 'atualizar as informações' if 'Editar' in acao else 'adicionar informações' }} de <strong>{{ tabela|replace('_',' ')|title }}</strong>.</p></div></section>
+<form class="form-panel" method="post">
+  <div class="form-panel-header"><span class="form-header-icon">▤</span><div><h3>Dados principais</h3><p>Preencha as informações abaixo. Os campos marcados com <span class="required-mark">*</span> são obrigatórios.</p></div></div>
+  <div class="form-fields">
+  {% for c in campos %}<div class="field-group {% if c.tipo == 'textarea' %}field-wide{% endif %}"><label for="{{ c.nome }}">{{ c.rotulo }}{% if c.obrigatorio %} <span class="required-mark">*</span>{% endif %}</label>
+  {% if c.tipo == 'fk' or c.tipo == 'select' %}<select id="{{ c.nome }}" name="{{ c.nome }}" {% if c.obrigatorio %}required{% endif %}><option value="">Selecione uma opção{% if not c.obrigatorio %} (opcional){% endif %}</option>{% for o in c.opcoes %}<option value="{{ o.id }}" {% if c.valor|string == o.id|string %}selected{% endif %}>{{ o.nome }}</option>{% endfor %}</select>
+  {% elif c.tipo == 'textarea' %}<textarea id="{{ c.nome }}" name="{{ c.nome }}" placeholder="Digite {{ c.rotulo|lower }}..." {% if c.obrigatorio %}required{% endif %}>{{ c.valor }}</textarea>
+  {% elif c.tipo == 'number_decimal' %}<input id="{{ c.nome }}" name="{{ c.nome }}" type="number" step="0.01" {% if tabela == 'notas' and c.nome == 'nota' %}min="0" max="10" placeholder="Ex.: 8,5"{% else %}placeholder="Informe {{ c.rotulo|lower }}"{% endif %} value="{{ c.valor }}" {% if c.obrigatorio %}required{% endif %}>
+  {% else %}<input id="{{ c.nome }}" name="{{ c.nome }}" type="{{ c.tipo }}" value="{{ c.valor }}" placeholder="Informe {{ c.rotulo|lower }}" {% if c.obrigatorio %}required{% endif %}>{% endif %}
+  </div>{% endfor %}
+  </div>
+  <div class="form-footer"><a class="button button-secondary" href="{{ url_for('listar', tabela=tabela) }}">Cancelar</a><button class="button button-primary" type="submit"><span>✓</span> Salvar cadastro</button></div>
+</form>
+{% endblock %}

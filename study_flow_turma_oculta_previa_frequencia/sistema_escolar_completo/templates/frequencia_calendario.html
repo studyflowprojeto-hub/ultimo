@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titulo %}Frequência{% endblock %}
+{% block cabecalho %}Frequência{% endblock %}
+{% block conteudo %}
+<div class="breadcrumb"><a href="{{ url_for('inicio') }}">Visão geral</a><span>›</span><span>Frequência</span></div>
+<section class="content-heading">
+  <div><span class="eyebrow">CONSULTA DE PRESENÇA</span><h2>Calendário de frequência</h2><p>Consulte os registros de frequência por data e disciplina.</p></div>
+</section>
+<div class="attendance-layout">
+  <section class="data-panel calendar-panel">
+    <div class="calendar-top">
+      <a class="calendar-nav" href="{{ url_for('calendario_frequencia', ano=(ano-1 if mes == 1 else ano), mes=(12 if mes == 1 else mes-1), data=(('%04d-%02d-01' % (ano-1,12)) if mes == 1 else ('%04d-%02d-01' % (ano,mes-1))), disciplina=disciplina_id) }}">‹</a>
+      <h3>{{ nome_mes }} de {{ ano }}</h3>
+      <a class="calendar-nav" href="{{ url_for('calendario_frequencia', ano=(ano+1 if mes == 12 else ano), mes=(1 if mes == 12 else mes+1), data=(('%04d-01-01' % (ano+1)) if mes == 12 else ('%04d-%02d-01' % (ano,mes+1))), disciplina=disciplina_id) }}">›</a>
+    </div>
+    <div class="calendar-grid">
+      {% for dia in ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'] %}<div class="calendar-weekday">{{ dia }}</div>{% endfor %}
+      {% for semana in semanas %}{% for numero in semana %}
+        {% if numero == 0 %}<div class="calendar-day empty"></div>{% else %}
+          {% set chave = '%04d-%02d-%02d'|format(ano, mes, numero) %}
+          <a class="calendar-day {% if chave == selecionada.isoformat() %}selected{% endif %} {% if chave in resumo %}has-records{% endif %}" href="{{ url_for('calendario_frequencia', ano=ano, mes=mes, data=chave, disciplina=disciplina_id) }}">
+            <span>{{ numero }}</span>{% if chave in resumo %}<small>{{ resumo[chave].presentes or 0 }}/{{ resumo[chave].total }}</small>{% endif %}
+          </a>
+        {% endif %}
+      {% endfor %}{% endfor %}
+    </div>
+    <div class="calendar-legend"><span><i class="legend-dot selected-dot"></i> Dia selecionado</span><span><i class="legend-dot record-dot"></i> Dia com frequência registrada</span></div>
+  </section>
+  <section class="data-panel attendance-panel">
+    <div class="panel-toolbar attendance-toolbar"><div><h3>{{ selecionada.strftime('%d/%m/%Y') }}</h3><p>Consulte os registros já salvos para este dia.</p></div></div>
+    <form method="get" action="{{ url_for('calendario_frequencia') }}" class="discipline-filter">
+      <input type="hidden" name="ano" value="{{ ano }}"><input type="hidden" name="mes" value="{{ mes }}"><input type="hidden" name="data" value="{{ selecionada.isoformat() }}">
+      <label for="disciplina">Disciplina</label>
+      <select id="disciplina" name="disciplina" onchange="this.form.submit()"><option value="">Todas as disciplinas</option>{% for d in disciplinas %}<option value="{{ d.id_disciplina }}" {% if disciplina_id == d.id_disciplina|string %}selected{% endif %}>{{ d.nome }}</option>{% endfor %}</select>
+    </form>
+    {% if disciplina_id %}
+      <div class="attendance-list">
+        {% set encontrados = namespace(total=0, presentes=0) %}
+        {% for aluno in alunos %}{% if aluno.id_aluno in registros %}
+          {% set encontrados.total = encontrados.total + 1 %}{% if registros[aluno.id_aluno] %}{% set encontrados.presentes = encontrados.presentes + 1 %}{% endif %}
+          <div class="attendance-student"><span class="student-avatar">{{ aluno.nome[:1]|upper }}</span><strong>{{ aluno.nome }}</strong><span class="{{ 'presence-choice' if registros[aluno.id_aluno] else 'absence-choice' }}">{{ 'Presente' if registros[aluno.id_aluno] else 'Falta' }}</span></div>
+        {% endif %}{% endfor %}
+        {% if encontrados.total == 0 %}<p class="empty-attendance">Não há registros para esta disciplina nesta data.</p>{% else %}<p class="attendance-summary">{{ encontrados.presentes }} presença(s) · {{ encontrados.total - encontrados.presentes }} falta(s) · {{ encontrados.total }} registro(s)</p>{% endif %}
+      </div>
+    {% else %}
+      <div class="empty-attendance">Selecione uma disciplina para consultar os registros deste dia.</div>
+    {% endif %}
+  </section>
+</div>
+<a class="back-link" href="{{ url_for('inicio') }}">← Voltar para a visão geral</a>
+{% endblock %}

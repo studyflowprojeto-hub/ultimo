@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titulo %}Notas{% endblock %}
+{% block cabecalho %}Notas{% endblock %}
+{% block conteudo %}
+<div class="breadcrumb"><a href="{{ url_for('inicio') }}">Visão geral</a><span>›</span><span>Notas</span></div>
+<section class="content-heading">
+  <div><span class="eyebrow">DESEMPENHO ESCOLAR</span><h2>Notas dos alunos</h2><p>Acompanhe os resultados por aluno, disciplina e bimestre.</p></div>
+  <a class="button button-primary" href="{{ url_for('novo', tabela='notas') }}"><span class="button-symbol">＋</span> Lançar nota</a>
+</section>
+<section class="stats-grid notes-stats">
+  <article class="stat-card"><span class="stat-label">Notas registradas</span><strong>{{ resumo.quantidade }}</strong><small>lançamentos no sistema</small></article>
+  <article class="stat-card"><span class="stat-label">Média geral</span><strong>{{ '%.2f'|format(resumo.media) if resumo.media is not none else '—' }}</strong><small>considerando todas as notas</small></article>
+  <article class="stat-card"><span class="stat-label">Maior nota</span><strong>{{ '%.2f'|format(resumo.maior) if resumo.maior is not none else '—' }}</strong><small>melhor resultado registrado</small></article>
+  <article class="stat-card"><span class="stat-label">Menor nota</span><strong>{{ '%.2f'|format(resumo.menor) if resumo.menor is not none else '—' }}</strong><small>menor resultado registrado</small></article>
+</section>
+<section class="data-panel">
+  <div class="panel-toolbar"><div><h3>Boletim de notas</h3><p>{{ registros|length }} lançamento(s) · notas em escala de 0 a 10</p></div><label class="search-box"><span>⌕</span><input type="search" id="notes-search" placeholder="Buscar aluno ou disciplina..." aria-label="Buscar notas"></label></div>
+  <div class="table-scroll"><table class="data-table notes-table"><thead><tr><th>Aluno</th><th>Disciplina</th><th>Bimestre</th><th>Nota</th><th class="actions-heading">Ações</th></tr></thead><tbody id="notes-body">
+  {% for r in registros %}<tr data-note-row>
+    <td><strong>{{ r.aluno }}</strong></td><td>{{ r.disciplina }}</td><td><span class="term-pill">{{ r.bimestre }}º bimestre</span></td>
+    <td><span class="grade-pill {% if r.nota >= 7 %}grade-good{% elif r.nota >= 5 %}grade-medium{% else %}grade-low{% endif %}">{{ '%.2f'|format(r.nota) }}</span></td>
+    <td><div class="row-actions"><a class="action-link" href="{{ url_for('editar', tabela='notas', id=r.id_nota) }}"><span>✎</span> Editar</a><form method="post" action="{{ url_for('excluir', tabela='notas', id=r.id_nota) }}" onsubmit="return confirm('Deseja realmente excluir esta nota?')"><button class="action-link action-delete" type="submit"><span>⌫</span> Excluir</button></form></div></td>
+  </tr>{% else %}<tr><td colspan="5"><div class="empty-state"><span class="empty-icon">▤</span><strong>Nenhuma nota cadastrada</strong><p>Adicione o primeiro resultado para começar a acompanhar o desempenho.</p><a href="{{ url_for('novo', tabela='notas') }}" class="button button-primary">＋ Lançar primeira nota</a></div></td></tr>{% endfor %}
+  </tbody></table><div id="notes-no-results" class="no-results" hidden>Nenhuma nota encontrada para essa busca.</div></div>
+</section>
+<a class="back-link" href="{{ url_for('inicio') }}">← Voltar para a visão geral</a>
+<script>
+(function(){const input=document.getElementById('notes-search');const rows=[...document.querySelectorAll('[data-note-row]')];const empty=document.getElementById('notes-no-results');if(!input)return;input.addEventListener('input',()=>{const q=input.value.toLocaleLowerCase('pt-BR').trim();let count=0;rows.forEach(row=>{const show=row.innerText.toLocaleLowerCase('pt-BR').includes(q);row.hidden=!show;if(show)count++;});empty.hidden=count!==0;});})();
+</script>
+{% endblock %}

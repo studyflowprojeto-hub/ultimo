@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Visão geral{% endblock %}
+{% block cabecalho %}Visão geral{% endblock %}
+{% block conteudo %}
+<section class="welcome-panel">
+  <div class="welcome-copy"><span class="pill pill-light">PAINEL DE CONTROLE</span><h2>Bem-vindo ao Study Flow 👋</h2><p>Consulte disciplinas, notas, frequência e materiais em um só lugar. As informações estão organizadas para facilitar o acompanhamento escolar.</p></div>
+  <div class="welcome-art" aria-hidden="true"><span class="art-circle circle-one"></span><span class="art-circle circle-two"></span><span class="art-book">▤</span></div>
+</section>
+
+<div class="section-heading"><div><span class="eyebrow">RESUMO DO SISTEMA</span><h2>Áreas disponíveis</h2><p>Escolha uma área para consultar e organizar as informações da escola.</p></div><div class="summary-count"><strong>{{ tabelas|length }}</strong><span>áreas disponíveis</span></div></div>
+
+<div class="dashboard-grid">
+{% set descricoes = {
+'alunos':'Cadastro e dados dos estudantes', 'professores':'Informações dos professores', 'disciplinas':'Matérias e componentes curriculares',
+'turmas':'Organização das turmas', 'aluno_turma':'Vínculo de alunos e turmas', 'professor_disciplina':'Disciplinas de cada professor',
+'notas':'Resultados e avaliações', 'frequencia':'Presença e faltas', 'materiais':'Materiais de apoio', 'recomendacoes':'Orientações e recomendações', 'atividades':'Atividades escolares'
+} %}
+{% set icones = {'alunos':'♧','professores':'♜','disciplinas':'▤','turmas':'▦','aluno_turma':'⇄','professor_disciplina':'⇄','notas':'✎','frequencia':'✓','materiais':'▣','recomendacoes':'☆','atividades':'☷'} %}
+{% for t in tabelas if t not in ['usuarios', 'permissoes', 'usuario_permissao', 'alunos', 'professores', 'turmas', 'aluno_turma', 'professor_disciplina'] %}
+<a class="dashboard-card" href="{{ url_for('listar', tabela=t) }}">
+  <span class="card-icon icon-{{ loop.index0 % 6 }}">{{ icones.get(t, '▦') }}</span>
+  <span class="card-content"><strong>{{ {'materiais':'Materiais de apoio','recomendacoes':'Recomendações','atividades':'Atividades escolares'}.get(t, t|replace('_',' ')|title) }}</strong><small>{{ descricoes.get(t, 'Consultar e gerenciar registros') }}</small></span>
+  <span class="card-arrow">↗</span>
+</a>
+{% endfor %}
+</div>
+<section class="section-heading" style="margin-top:28px"><div><span class="eyebrow">ACOMPANHAMENTO</span><h2>Prévia da frequência</h2><p>Últimos registros de presença e falta.</p></div><a class="btn btn-secondary" href="{{ url_for('calendario_frequencia') }}">Ver calendário</a></section>
+{% if previa_frequencia %}
+<div class="table-wrap"><table class="data-table"><thead><tr><th>Data</th><th>Disciplina</th><th>Presentes</th><th>Faltas</th><th>Total</th></tr></thead><tbody>
+{% for item in previa_frequencia %}<tr><td>{{ item.data_aula.strftime('%d/%m/%Y') }}</td><td>{{ item.disciplina }}</td><td>{{ item.presentes or 0 }}</td><td>{{ item.faltas or 0 }}</td><td>{{ item.total }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}
+<div class="tip-panel"><span class="tip-icon">✓</span><div><strong>Nenhum registro de frequência ainda</strong><p>Quando houver registros no sistema, um resumo dos últimos dias aparecerá aqui.</p></div></div>
+{% endif %}
+<div class="tip-panel"><span class="tip-icon">✦</span><div><strong>Dica para começar</strong><p>Consulte as disciplinas, notas, frequência e materiais para acompanhar as atividades escolares.</p></div></div>
+{% endblock %}

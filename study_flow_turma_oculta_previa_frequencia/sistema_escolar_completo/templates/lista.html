@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titulo %}{{ {'materiais':'Materiais de apoio','recomendacoes':'Recomendações','atividades':'Atividades escolares'}.get(tabela, tabela|replace('_',' ')|title) }}{% endblock %}
+{% block cabecalho %}{{ {'materiais':'Materiais de apoio','recomendacoes':'Recomendações','atividades':'Atividades escolares'}.get(tabela, tabela|replace('_',' ')|title) }}{% endblock %}
+{% block conteudo %}
+<div class="breadcrumb"><a href="{{ url_for('inicio') }}">Visão geral</a><span>›</span><span>{{ {'materiais':'Materiais de apoio','recomendacoes':'Recomendações','atividades':'Atividades escolares'}.get(tabela, tabela|replace('_',' ')|title) }}</span></div>
+<section class="content-heading">
+  <div><span class="eyebrow">GERENCIAMENTO DE DADOS</span><h2>{{ {'materiais':'Materiais de apoio','recomendacoes':'Recomendações','atividades':'Atividades escolares'}.get(tabela, tabela|replace('_',' ')|title) }}</h2><p>Veja as informações cadastradas e encontre rapidamente o que precisa.</p></div>
+  <a class="button button-primary" href="{{ url_for('novo', tabela=tabela) }}"><span class="button-symbol">＋</span> Adicionar registro</a>
+</section>
+<section class="data-panel">
+  <div class="panel-toolbar"><div><h3>Registros cadastrados</h3><p>{{ registros|length }} registro(s) encontrado(s) · exibindo apenas informações relevantes</p></div><label class="search-box"><span>⌕</span><input type="search" data-table-search placeholder="Buscar por nome ou informação..." aria-label="Buscar registros"></label></div>
+  <div class="table-scroll"><table class="data-table"><thead><tr>{% for c in colunas %}<th>{{ c.rotulo }}</th>{% endfor %}{% if pk %}<th class="actions-heading">Ações</th>{% endif %}</tr></thead><tbody>
+  {% for r in registros %}<tr data-search-row>{% for c in colunas %}<td><span class="cell-value">{{ r[c.nome] if r[c.nome] is not none and r[c.nome] != '' else '—' }}</span></td>{% endfor %}{% if pk %}<td><div class="row-actions"><a class="action-link" href="{{ url_for('editar', tabela=tabela, id=r[pk]) }}" title="Editar registro"><span>✎</span> Editar</a><form method="post" action="{{ url_for('excluir', tabela=tabela, id=r[pk]) }}" onsubmit="return confirm('Tem certeza que deseja excluir este registro?')"><button class="action-link action-delete" type="submit" title="Excluir registro"><span>⌫</span> Excluir</button></form></div></td>{% endif %}</tr>
+  {% else %}<tr><td colspan="{{ colunas|length + (1 if pk else 0) }}"><div class="empty-state"><span class="empty-icon">▤</span><strong>Nenhum registro por aqui</strong><p>Quando houver dados cadastrados, eles aparecerão nesta tabela.</p><a href="{{ url_for('novo', tabela=tabela) }}" class="button button-primary">＋ Fazer primeiro cadastro</a></div></td></tr>{% endfor %}
+  </tbody></table><div class="no-results" hidden id="no-results">Nenhum registro corresponde à sua busca.</div></div>
+  {% if not pk %}<div class="info-strip"><span>ⓘ</span><p>Esta tabela usa uma chave primária composta. Nesta versão, é possível consultar e adicionar registros, mas a edição e exclusão não estão disponíveis.</p></div>{% endif %}
+</section>
+<a class="back-link" href="{{ url_for('inicio') }}">← Voltar para a visão geral</a>
+<script>
+(function(){var input=document.querySelector('[data-table-search]');if(!input)return;input.addEventListener('input',function(){var rows=document.querySelectorAll('[data-search-row]');var visible=0;rows.forEach(function(row){if(!row.hidden)visible++;});var empty=document.getElementById('no-results');if(empty)empty.hidden=visible!==0;});})();
+</script>
+{% endblock %}

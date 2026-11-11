@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#4c1d95">
+  <title>Criar conta | Study Flow</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="login-body">
+  <main class="login-layout">
+    <section class="login-showcase">
+      <div class="login-brand"><span class="brand-mark">SF</span><span><strong>Study Flow</strong><small>Gestão escolar</small></span></div>
+      <div class="login-message">
+        <span class="login-tag">COMECE POR AQUI</span>
+        <h1>Seu caminho<br>começa agora.</h1>
+        <p>Crie sua conta para acessar o espaço escolar do Study Flow e manter tudo mais organizado.</p>
+      </div>
+      <div class="login-decoration"><span>SF</span><i></i><b></b></div>
+      <div class="login-showcase-footer">Organização que acompanha seu aprendizado.</div>
+    </section>
+    <section class="login-side">
+      <div class="login-card">
+        <div class="login-icon">＋</div>
+        <p class="login-overline">NOVA CONTA</p>
+        <h2>Crie sua conta</h2>
+        <p class="login-subtitle">Preencha os campos abaixo para começar a usar o Study Flow.</p>
+        {% with msgs = get_flashed_messages() %}
+          {% if msgs %}<div class="login-alert">{% for msg in msgs %}<p>{{ msg }}</p>{% endfor %}</div>{% endif %}
+        {% endwith %}
+        <form method="post" action="{{ url_for('cadastro') }}" class="login-form">
+          <div class="login-field"><label for="nome">Nome completo</label><input id="nome" name="nome" type="text" placeholder="Seu nome" maxlength="100" autocomplete="name" required autofocus value="{{ request.form.get('nome', '') }}"></div>
+          <div class="login-field"><label for="email">E-mail</label><input id="email" name="email" type="email" placeholder="seuemail@exemplo.com" maxlength="150" autocomplete="email" required value="{{ request.form.get('email', '') }}"></div>
+          <div class="login-field"><label for="senha">Senha</label><input id="senha" name="senha" type="password" placeholder="Pelo menos 6 caracteres" minlength="6" autocomplete="new-password" required></div>
+          <div class="login-field"><label for="confirmar_senha">Confirmar senha</label><input id="confirmar_senha" name="confirmar_senha" type="password" placeholder="Digite a senha novamente" minlength="6" autocomplete="new-password" required></div>
+          <button class="login-submit" type="submit">Criar conta <span>→</span></button>
+        </form>
+        <p class="login-help">Já tem uma conta? <a class="login-link" href="{{ url_for('login') }}">Entrar</a></p>
+      </div>
+      <footer class="login-footer">Study Flow · Sistema de gestão escolar</footer>
+    </section>
+  </main>
+</body>
+</html>
